@@ -1,18 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import { localDB } from '../firebase';
 import { Map, AlertCircle } from 'lucide-react';
 import './Auth.css';
-
-const GOOGLE_CLIENT_ID = '640946840784-YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com';
 
 const Auth = () => {
   const navigate = useNavigate();
   const { setDemoMode, loginWithGoogle, currentUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [gsiReady, setGsiReady] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -26,88 +24,52 @@ const Auth = () => {
     }
   }, [currentUser, navigate]);
 
-  // Load Google Identity Services script
-  useEffect(() => {
-    if (window.google?.accounts?.id) {
-      setGsiReady(true);
-      return;
-    }
+  // Google OAuth login — opens a popup, gets an access token,
+  // then fetches user info from Google's userinfo endpoint.
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        setLoading(true);
+        setError('');
 
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => setGsiReady(true);
-    script.onerror = () => setError('Failed to load Google Sign-In. Check your connection.');
-    document.head.appendChild(script);
+        // Fetch user profile from Google using the access token
+        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        });
 
-    return () => {
-      // Don't remove script on unmount — GSI should persist
-    };
-  }, []);
+        if (!res.ok) {
+          throw new Error('Failed to fetch user info from Google.');
+        }
 
-  const handleCredentialResponse = useCallback((response) => {
-    try {
-      setLoading(true);
-      setError('');
+        const profile = await res.json();
+        // profile contains: sub, name, given_name, family_name, picture, email, email_verified
 
-      // Decode the JWT credential to get user info
-      const payload = JSON.parse(atob(response.credential.split('.')[1]));
+        const userData = loginWithGoogle(profile);
 
-      const userData = loginWithGoogle(payload);
-
-      if (userData?.onboardingComplete) {
-        navigate('/dashboard');
-      } else {
-        navigate('/onboarding');
+        if (userData?.onboardingComplete) {
+          navigate('/dashboard');
+        } else {
+          navigate('/onboarding');
+        }
+      } catch (err) {
+        console.error('Google Sign-In Error:', err);
+        setError(err.message || 'Sign-in failed. Please try again.');
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('Google Sign-In Error:', err);
-      setError(`Sign-in failed: ${err.message}`);
-    } finally {
+    },
+    onError: (err) => {
+      console.error('Google OAuth Error:', err);
+      setError('Google sign-in was cancelled or failed. Please try again.');
       setLoading(false);
-    }
-  }, [loginWithGoogle, navigate]);
+    },
+    flow: 'implicit',
+  });
 
   const handleGoogleSignIn = () => {
-    if (!gsiReady || !window.google?.accounts?.id) {
-      setError('Google Sign-In is still loading. Please wait a moment and try again.');
-      return;
-    }
-
     setLoading(true);
     setError('');
-
-    try {
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleCredentialResponse,
-        auto_select: false,
-      });
-
-      window.google.accounts.id.prompt((notification) => {
-        if (notification.isNotDisplayed()) {
-          // Fallback: use the popup method
-          window.google.accounts.id.renderButton(
-            document.getElementById('google-signin-fallback'),
-            { theme: 'filled_black', size: 'large', width: '100%' }
-          );
-          // Click the rendered button automatically
-          const fallbackBtn = document.getElementById('google-signin-fallback');
-          if (fallbackBtn) {
-            const innerBtn = fallbackBtn.querySelector('div[role="button"]');
-            if (innerBtn) innerBtn.click();
-          }
-          setLoading(false);
-        } else if (notification.isSkippedMoment()) {
-          setLoading(false);
-        }
-      });
-    } catch (err) {
-      console.error('Google Sign-In Error:', err);
-      setError(`Sign-in failed: ${err.message}`);
-      setLoading(false);
-    }
+    googleLogin();
   };
 
   const handleDemoMode = () => {
@@ -136,6 +98,7 @@ const Auth = () => {
             className="btn btn-google full-width" 
             onClick={handleGoogleSignIn}
             disabled={loading}
+            id="google-signin-btn"
           >
             {loading ? (
               <span className="loader-spin"></span>
@@ -151,9 +114,6 @@ const Auth = () => {
               </>
             )}
           </button>
-
-          {/* Hidden fallback container for Google button */}
-          <div id="google-signin-fallback" style={{ display: 'none' }}></div>
           
           <div className="auth-divider">
             <span>or</span>
@@ -163,6 +123,7 @@ const Auth = () => {
             className="btn btn-outline full-width"
             onClick={handleDemoMode}
             disabled={loading}
+            id="demo-mode-btn"
           >
             Continue as Demo
           </button>

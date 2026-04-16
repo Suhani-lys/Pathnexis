@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { googleLogout } from '@react-oauth/google';
 import { localDB } from '../firebase';
 
 const AuthContext = createContext();
@@ -95,10 +96,8 @@ export const AuthProvider = ({ children }) => {
     setCurrentUser(null);
     setUserData(null);
     localStorage.removeItem('pathnexis_currentUser');
-    // Revoke Google token if present
-    if (window.google?.accounts?.id) {
-      window.google.accounts.id.disableAutoSelect();
-    }
+    // Revoke Google session
+    googleLogout();
   };
 
   const value = {

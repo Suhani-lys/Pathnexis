@@ -1,6 +1,7 @@
-// src/firebase.js — Google OAuth configuration (no Firebase dependencies)
+// src/firebase.js — Google OAuth configuration + localStorage database
 
-export const GOOGLE_CLIENT_ID = '640946840784-YOUR_CLIENT_ID.apps.googleusercontent.com';
+// Google OAuth Client ID from environment
+export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 // Simple localStorage-based database helper
 // Replaces Firestore for local-first data persistence
