@@ -1,0 +1,61 @@
+.testimonials-section {
+  padding: 100px 20px;
+  position: relative;
+}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.testimonial-card {
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.stars {
+  display: flex;
+  gap: 0.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.star-icon {
+  color: #FBBF24;
+}
+
+.quote {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--text-main);
+  flex-grow: 1;
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+
+.student-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent-blue);
+}
+
+.student-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.2rem;
+}
+
+.student-college {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

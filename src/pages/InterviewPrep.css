@@ -1,0 +1,212 @@
+.interview-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.interview-page .page-title {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: 3rem;
+}
+
+.prep-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.prep-column {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.column-header {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 1rem;
+}
+
+.column-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--primary);
+  font-size: 1.3rem;
+}
+
+/* Accordion Section */
+.dropdown-container {
+  margin-bottom: 1.5rem;
+}
+
+.skill-select {
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  color: #fff;
+  background-color: rgba(15, 23, 42, 0.8);
+}
+
+.skill-select option {
+  background-color: var(--bg-dark);
+  color: #fff;
+}
+
+.accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.accordion-item {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.accordion-item.open {
+  border-color: rgba(79, 142, 247, 0.3);
+  box-shadow: 0 4px 15px rgba(79, 142, 247, 0.1);
+}
+
+.accordion-header {
+  padding: 1rem 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 500;
+  color: #fff;
+}
+
+.accordion-header:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.q-text {
+  flex: 1;
+  padding-right: 1rem;
+  line-height: 1.4;
+}
+
+.accordion-body {
+  padding: 1rem 1.2rem;
+  background: rgba(0,0,0,0.2);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.a-hint-label {
+  color: #4ade80;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* Resume Upload Prompt */
+.upload-prompt {
+  padding: 2rem 1rem;
+}
+
+.upload-icon {
+  color: var(--primary);
+  opacity: 0.8;
+}
+
+/* Chat Interface */
+.chat-interface {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-notification {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  margin: 0 auto 1.5rem;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.chat-bubbles {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  flex: 1;
+}
+
+.chat-bubble {
+  display: flex;
+  gap: 12px;
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+  max-width: 85%;
+  line-height: 1.4;
+  position: relative;
+  animation: slideIn 0.3s ease;
+}
+
+.chat-bubble.bot {
+  background: rgba(79, 142, 247, 0.15);
+  border: 1px solid rgba(79, 142, 247, 0.3);
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+}
+
+.chat-bubble.bot .bubble-icon {
+  color: #60a5fa;
+  margin-top: 2px;
+}
+
+.chat-bubble.bot .bubble-text {
+  color: #fff;
+  font-weight: 500;
+}
+
+.chat-bubble.user {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  align-self: flex-end;
+  border-bottom-right-radius: 2px;
+}
+
+.chat-bubble.user .bubble-icon {
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.chat-bubble.user .bubble-text {
+  color: #cbd5e1;
+  font-size: 0.95rem;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 900px) {
+  .prep-grid {
+    grid-template-columns: 1fr;
+  }
+}
