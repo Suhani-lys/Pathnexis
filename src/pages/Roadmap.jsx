@@ -50,7 +50,7 @@ const Roadmap = () => {
       const prompt = `Generate a personalized 12-week placement preparation roadmap for a student targeting ${formData.role} at ${formData.company} with DSA skill ${formData.dsaSkill}/10 and Programming skill ${formData.progSkill}/10. Return only a valid JSON array of 12 objects with no markdown or extra text. Each object must have: week_number (integer), theme (string), tasks (array of exactly 5 strings), skill_badge (string).`;
       
       const response = await fetch(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyD91GvC0Q3jYQAr5YsePaEpj6NKjgnmZg8",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key="+import.meta.env.VITE_API_KEY
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
