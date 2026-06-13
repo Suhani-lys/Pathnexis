@@ -2,27 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
-import { localDB } from '../firebase';
 import { Map, AlertCircle } from 'lucide-react';
 import './Auth.css';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { setDemoMode, loginWithGoogle, currentUser } = useAuth();
+  const { setDemoMode, loginWithGoogle, currentUser, userData } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   // Redirect if already logged in
   useEffect(() => {
     if (currentUser) {
-      const data = localDB.getUser(currentUser.uid);
+      const userKey = `pathnexis_user_${currentUser.uid}`;
+      const localProfile = localStorage.getItem(userKey);
+      const data = userData || (localProfile ? JSON.parse(localProfile) : null);
+      
       if (data?.onboardingComplete) {
         navigate('/dashboard');
       } else {
         navigate('/onboarding');
       }
     }
-  }, [currentUser, navigate]);
+  }, [currentUser, userData, navigate]);
 
   // Google OAuth login — opens a popup, gets an access token,
   // then fetches user info from Google's userinfo endpoint.
@@ -44,9 +46,9 @@ const Auth = () => {
         const profile = await res.json();
         // profile contains: sub, name, given_name, family_name, picture, email, email_verified
 
-        const userData = loginWithGoogle(profile);
+        const fetchedUser = await loginWithGoogle(profile);
 
-        if (userData?.onboardingComplete) {
+        if (fetchedUser?.onboardingComplete) {
           navigate('/dashboard');
         } else {
           navigate('/onboarding');
@@ -72,8 +74,8 @@ const Auth = () => {
     googleLogin();
   };
 
-  const handleDemoMode = () => {
-    setDemoMode(true);
+  const handleDemoMode = async () => {
+    await setDemoMode(true);
     navigate('/dashboard');
   };
 

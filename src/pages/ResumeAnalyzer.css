@@ -6,7 +6,7 @@
 
 .analyzer-page .page-title {
   font-size: 2.5rem;
-  background: linear-gradient(135deg, #fff 0%, #38bdf8 100%);
+  background: linear-gradient(135deg, var(--text-main) 0%, var(--primary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 0.5rem;
@@ -41,7 +41,7 @@
 
 .upload-zone h3 {
   font-size: 1.5rem;
-  color: #fff;
+  color: var(--text-main);
 }
 
 .scanning-state {
@@ -127,7 +127,7 @@
 .ats-value {
   font-size: 2.2rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-main);
   line-height: 1;
 }
 
@@ -141,7 +141,7 @@
 
 .ats-text h2 {
   font-size: 1.5rem;
-  color: #fff;
+  color: var(--text-main);
   margin-bottom: 0.5rem;
 }
 
@@ -167,7 +167,7 @@
   justify-content: space-between;
   margin-bottom: 0.4rem;
   font-size: 0.9rem;
-  color: #cbd5e1;
+  color: var(--text-main);
   font-weight: 500;
 }
 
@@ -243,11 +243,11 @@
 }
 
 .tip-icon {
-  color: #fbbf24;
+  color: #EC4899;
 }
 
 .tip-card p {
-  color: #cbd5e1;
+  color: var(--text-main);
   font-size: 0.95rem;
   line-height: 1.5;
 }
@@ -257,6 +257,20 @@
 .px-5 { justify-content: center; width: auto; display: inline-flex; }
 .btn-ghost { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; }
 .btn-ghost:hover { color: #fff; text-decoration: underline; }
+
+.offline-banner {
+  background: rgba(217, 119, 6, 0.08);
+  border: 1px solid rgba(217, 119, 6, 0.3);
+  color: #d97706;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+}
 
 @media (max-width: 900px) {
   .results-header {

@@ -126,7 +126,7 @@ const Settings = () => {
           <Save size={18} />
           {saving ? 'Saving...' : saved ? '✅ Saved!' : 'Save Changes'}
         </button>
-        {isDemo && <p style={{ color: '#FBBF24', fontSize: '0.85rem', marginTop: '8px' }}>Profile editing is disabled in Demo mode.</p>}
+        {isDemo && <p style={{ color: '#EC4899', fontSize: '0.85rem', marginTop: '8px' }}>Profile editing is disabled in Demo mode.</p>}
       </div>
 
       {/* Account Section */}

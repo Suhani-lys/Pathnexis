@@ -7,11 +7,6 @@ import Onboarding from './pages/Onboarding/Onboarding';
 import DashboardLayout from './layouts/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import Roadmap from './pages/Roadmap';
-import ReadinessCalculator from './pages/ReadinessCalculator';
-import ProbabilityPredictor from './pages/ProbabilityPredictor';
-import Leaderboard from './pages/Leaderboard';
-import DailyTasks from './pages/DailyTasks';
-import CompanyIntel from './pages/CompanyIntel';
 import PortfolioTracker from './pages/PortfolioTracker';
 import ResumeAnalyzer from './pages/ResumeAnalyzer';
 import InterviewPrep from './pages/InterviewPrep';
@@ -43,11 +38,6 @@ function App() {
           }>
             <Route index element={<Dashboard />} />
             <Route path="roadmap" element={<Roadmap />} />
-            <Route path="readiness-calculator" element={<ReadinessCalculator />} />
-            <Route path="probability-predictor" element={<ProbabilityPredictor />} />
-            <Route path="leaderboard" element={<Leaderboard />} />
-            <Route path="tasks" element={<DailyTasks />} />
-            <Route path="companies" element={<CompanyIntel />} />
             <Route path="portfolio" element={<PortfolioTracker />} />
             <Route path="resume-analyzer" element={<ResumeAnalyzer />} />
             <Route path="interview" element={<InterviewPrep />} />

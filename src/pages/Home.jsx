@@ -1,9 +1,6 @@
 import React, { useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
-import HowItWorks from '../components/HowItWorks';
-import Features from '../components/Features';
-import Testimonials from '../components/Testimonials';
 import Footer from '../components/Footer';
 
 const Home = () => {
@@ -16,9 +13,6 @@ const Home = () => {
       <Navbar />
       <main>
         <Hero />
-        <HowItWorks />
-        <Features />
-        <Testimonials />
       </main>
       <Footer />
     </div>

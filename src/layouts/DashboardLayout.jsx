@@ -25,14 +25,9 @@ import './DashboardLayout.css';
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, exact: true },
   { path: '/dashboard/roadmap', label: 'My Roadmap', icon: <MapIcon size={20} /> },
-  { path: '/dashboard/tasks', label: 'Daily Tasks', icon: <CheckSquare size={20} /> },
-  { path: '/dashboard/companies', label: 'Company Intel', icon: <Building size={20} /> },
-  { path: '/dashboard/readiness-calculator', label: 'Readiness Quiz', icon: <Target size={20} /> },
-  { path: '/dashboard/probability-predictor', label: 'Chances Predictor', icon: <BarChart size={20} /> },
   { path: '/dashboard/portfolio', label: 'Portfolio', icon: <Briefcase size={20} /> },
   { path: '/dashboard/interview', label: 'Interview Prep', icon: <Mic size={20} /> },
   { path: '/dashboard/resume-analyzer', label: 'Resume Analyzer', icon: <FileText size={20} /> },
-  { path: '/dashboard/leaderboard', label: 'Leaderboard', icon: <Trophy size={20} /> },
   { path: '/dashboard/settings', label: 'Settings', icon: <Settings size={20} /> },
 ];
 
@@ -53,7 +48,7 @@ const DashboardLayout = () => {
   };
 
   const displayName = isDemo ? "Alex Johnson" : (userData?.displayName || currentUser?.displayName || "Student");
-  const photoURL = isDemo ? "https://ui-avatars.com/api/?name=Alex+Johnson&background=4F8EF7&color=fff" : (userData?.photoURL || currentUser?.photoURL || `https://ui-avatars.com/api/?name=${displayName.replace(' ', '+')}&background=4F8EF7&color=fff`);
+  const photoURL = isDemo ? "https://ui-avatars.com/api/?name=Alex+Johnson&background=7C3AED&color=fff" : (userData?.photoURL || currentUser?.photoURL || `https://ui-avatars.com/api/?name=${displayName.replace(' ', '+')}&background=7C3AED&color=fff`);
 
   const [notifications, setNotifications] = useState([
     { id: 1, text: "⚠️ You haven't practiced DSA in 2 days — your streak is at risk!", accent: "red", time: "2 hours ago" },

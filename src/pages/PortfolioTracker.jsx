@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Award, Briefcase, Code2, ShieldAlert, BadgeInfo, Calendar, Link as LinkIcon, DownloadCloud, UploadCloud, FileText } from 'lucide-react';
+import { Award, Briefcase, Code2, ShieldAlert, BadgeInfo, Calendar, Link as LinkIcon, DownloadCloud, UploadCloud, FileText, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './PortfolioTracker.css';
 
@@ -35,25 +35,95 @@ const PortfolioTracker = () => {
   const [projForm, setProjForm] = useState({ title: '', stack: '', github: '', description: '' });
   const [hackForm, setHackForm] = useState({ name: '', organizer: '', rank: '', year: '' });
   
-  const [dsaInput, setDsaInput] = useState({ leetcode: MOCK_DATA.dsa.leetcode, gfg: MOCK_DATA.dsa.gfg, hackerrank: MOCK_DATA.dsa.hackerrank });
+  const [dsaInput, setDsaInput] = useState({ leetcode: MOCK_DATA.dsa.leetcode });
   const [leetcodeUsername, setLeetcodeUsername] = useState('');
+  const [leetcodeAiAnalysis, setLeetcodeAiAnalysis] = useState('');
+  const [isLeetcodeLoading, setIsLeetcodeLoading] = useState(false);
+
+  const [githubUsername, setGithubUsername] = useState('');
+  const [githubData, setGithubData] = useState(null);
+  const [githubAiAnalysis, setGithubAiAnalysis] = useState('');
+  const [isGithubLoading, setIsGithubLoading] = useState(false);
 
   useEffect(() => {
-    if (isDemo || !currentUser) return;
-    const saved = localStorage.getItem(`pathnexis_portfolio_${currentUser.uid}`);
-    if (saved) {
-      const data = JSON.parse(saved);
-      if (data.certs) setCerts(data.certs);
-      if (data.projects) setProjects(data.projects);
-      if (data.hackathons) setHackathons(data.hackathons);
-    }
-  }, [currentUser, isDemo]);
+    const loadPortfolio = async () => {
+      if (!currentUser) return;
+      
+      // Load local storage backup first for instant renders and offline fallback
+      const storageKey = isDemo ? `pathnexis_portfolio_demo` : `pathnexis_portfolio_${currentUser.uid}`;
+      const localData = localStorage.getItem(storageKey);
+      if (localData) {
+        try {
+          const port = JSON.parse(localData);
+          if (port.certs) setCerts(port.certs);
+          if (port.projects) setProjects(port.projects);
+          if (port.hackathons) setHackathons(port.hackathons);
+          if (port.dsa) setDsaInput(port.dsa);
+          if (port.githubData) setGithubData(port.githubData);
+          if (port.leetcodeUsername) setLeetcodeUsername(port.leetcodeUsername);
+          if (port.leetcodeAiAnalysis) setLeetcodeAiAnalysis(port.leetcodeAiAnalysis);
+          if (port.githubUsername) setGithubUsername(port.githubUsername);
+          if (port.githubAiAnalysis) setGithubAiAnalysis(port.githubAiAnalysis);
+        } catch (e) {
+          console.warn("Failed to parse local portfolio backup:", e);
+        }
+      }
 
-  const savePortfolioToLocal = (newCerts, newProjects, newHackathons) => {
-    if (currentUser) {
-      localStorage.setItem(`pathnexis_portfolio_${currentUser.uid}`, JSON.stringify({
-        certs: newCerts, projects: newProjects, hackathons: newHackathons
-      }));
+      // Sync from MongoDB in the background
+      try {
+        const res = await fetch(`http://localhost:3000/api/portfolio/${currentUser.uid}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === "success" && data.portfolio) {
+            const port = data.portfolio;
+            if (port.certs) setCerts(port.certs);
+            if (port.projects) setProjects(port.projects);
+            if (port.hackathons) setHackathons(port.hackathons);
+            if (port.dsa) setDsaInput(port.dsa);
+            if (port.githubData) setGithubData(port.githubData);
+            if (port.leetcodeUsername) setLeetcodeUsername(port.leetcodeUsername);
+            if (port.leetcodeAiAnalysis) setLeetcodeAiAnalysis(port.leetcodeAiAnalysis);
+            if (port.githubUsername) setGithubUsername(port.githubUsername);
+            if (port.githubAiAnalysis) setGithubAiAnalysis(port.githubAiAnalysis);
+            
+            // Re-sync local backup
+            localStorage.setItem(storageKey, JSON.stringify(port));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load portfolio from MongoDB, using local backup:", err);
+      }
+    };
+    loadPortfolio();
+  }, [currentUser]);
+
+  const savePortfolioToLocal = async (newCerts, newProjects, newHackathons, newDsa, newGithub, extra = {}) => {
+    if (!currentUser) return;
+    const payload = {
+      certs: newCerts || certs,
+      projects: newProjects || projects,
+      hackathons: newHackathons || hackathons,
+      dsa: newDsa || dsaInput,
+      githubData: newGithub || githubData,
+      leetcodeUsername: extra.leetcodeUsername !== undefined ? extra.leetcodeUsername : leetcodeUsername,
+      leetcodeSolved: (newDsa || dsaInput).leetcode,
+      leetcodeAiAnalysis: extra.leetcodeAiAnalysis !== undefined ? extra.leetcodeAiAnalysis : leetcodeAiAnalysis,
+      githubUsername: extra.githubUsername !== undefined ? extra.githubUsername : githubUsername,
+      githubAiAnalysis: extra.githubAiAnalysis !== undefined ? extra.githubAiAnalysis : githubAiAnalysis
+    };
+    
+    // Instantly save to local storage backup for offline reliability
+    const storageKey = isDemo ? `pathnexis_portfolio_demo` : `pathnexis_portfolio_${currentUser.uid}`;
+    localStorage.setItem(storageKey, JSON.stringify(payload));
+
+    try {
+      await fetch(`http://localhost:3000/api/portfolio/${currentUser.uid}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.error("Failed to save portfolio data to MongoDB:", err);
     }
   };
 
@@ -73,6 +143,24 @@ const PortfolioTracker = () => {
       const updated = [item, ...hackathons];
       setHackathons(updated);
       savePortfolioToLocal(certs, projects, updated);
+    }
+  };
+
+  const handleDeleteItem = (type, id) => {
+    if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
+      if (type === 'certification') {
+        const updated = certs.filter(c => c.id !== id);
+        setCerts(updated);
+        savePortfolioToLocal(updated, projects, hackathons);
+      } else if (type === 'project') {
+        const updated = projects.filter(p => p.id !== id);
+        setProjects(updated);
+        savePortfolioToLocal(certs, updated, hackathons);
+      } else if (type === 'hackathon') {
+        const updated = hackathons.filter(h => h.id !== id);
+        setHackathons(updated);
+        savePortfolioToLocal(certs, projects, updated);
+      }
     }
   };
 
@@ -99,39 +187,99 @@ const PortfolioTracker = () => {
 
   const fetchLeetcodeStats = async () => {
     if(!leetcodeUsername) return;
+    setIsLeetcodeLoading(true);
     try {
-      const query = `
-        query getUserProfile($username: String!) {
-          matchedUser(username: $username) {
-            submitStats {
-              acSubmissionNum {
-                difficulty
-                count
-              }
-            }
-          }
-        }
-      `;
-      const res = await fetch('https://leetcode.com/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, variables: { username: leetcodeUsername } })
+      // Calling our custom Node.js backend to bypass CORS
+      const res = await fetch(`http://localhost:3000/api/leetcode/${leetcodeUsername}`);
+      const data = await res.json();
+      
+      if (data.status === "success") {
+        const newDsa = { ...dsaInput, leetcode: data.totalSolved || 0 };
+        setDsaInput(newDsa);
+        savePortfolioToLocal(certs, projects, hackathons, newDsa, githubData);
+        generateLeetcodeAnalysis(data);
+      } else {
+        alert("LeetCode user not found or private profile.");
+      }
+    } catch(err) {
+      console.warn("Failed to fetch LeetCode stats", err);
+      alert('Unable to fetch LeetCode stats. Please enter manually.');
+    }
+    setIsLeetcodeLoading(false);
+  };
+
+  const generateLeetcodeAnalysis = async (data) => {
+    if (!data.totalSolved) return;
+    try {
+      const prompt = `You are an expert AI technical recruiter. A candidate has solved ${data.totalSolved} LeetCode problems (Easy: ${data.easy}, Medium: ${data.medium}, Hard: ${data.hard}). Write a 2-3 sentence personalized analysis highlighting their problem-solving proficiency and suggesting their next area of focus. Keep it encouraging and professional.`;
+      const apiKey = import.meta.env.VITE_API_KEY;
+      if (!apiKey) return setLeetcodeAiAnalysis("Add Gemini API Key to see AI Analysis.");
+      
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+      const responseData = await res.json();
+      if (responseData.candidates && responseData.candidates.length > 0) {
+        const text = responseData.candidates[0].content.parts[0].text;
+        setLeetcodeAiAnalysis(text);
+        savePortfolioToLocal(certs, projects, hackathons, dsaInput, githubData, { leetcodeAiAnalysis: text });
+      }
+    } catch (err) {
+      console.error("Failed to generate LeetCode AI analysis", err);
+    }
+  };
+
+  const fetchGithubStats = async () => {
+    if(!githubUsername) return;
+    setIsGithubLoading(true);
+    try {
+      const res = await fetch(`http://localhost:3000/api/github/${githubUsername}`);
+      const data = await res.json();
+      if (data.status === "success") {
+        setGithubData(data);
+        savePortfolioToLocal(certs, projects, hackathons, dsaInput, data);
+        generateGithubDNAAnalysis(data.languageStats);
+      } else {
+        alert("GitHub user not found.");
+      }
+    } catch(err) {
+      console.error("Failed to fetch GitHub stats", err);
+      alert('Unable to fetch GitHub stats.');
+    }
+    setIsGithubLoading(false);
+  };
+
+  const generateGithubDNAAnalysis = async (languageStats) => {
+    if (!languageStats || languageStats.length === 0) return;
+    try {
+      const topLangs = languageStats.slice(0, 3).map(l => `${l.language} (${l.percentage}%)`).join(', ');
+      const prompt = `You are a technical recruiter AI. A candidate has the following top programming languages based on their GitHub repositories: ${topLangs}. Write a 2-3 sentence personalized "Developer DNA" analysis highlighting their strengths and suggesting one potential area of growth. Keep it encouraging and professional.`;
+      const apiKey = import.meta.env.VITE_API_KEY;
+      if (!apiKey) return setGithubAiAnalysis("Add Gemini API Key to see AI Analysis.");
+      
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
       });
       const data = await res.json();
-      const allStats = data.data.matchedUser.submitStats.acSubmissionNum;
-      const total = allStats.find(s => s.difficulty === 'All')?.count || 0;
-      setDsaInput(prev => ({ ...prev, leetcode: total }));
-    } catch(err) {
-      console.warn("CORS Blocked Leetcode Fetch or invalid user.");
-      alert('Unable to fetch from LeetCode due to browser CORS limits. Please enter manually.');
+      if (data.candidates && data.candidates.length > 0) {
+        const text = data.candidates[0].content.parts[0].text;
+        setGithubAiAnalysis(text);
+        savePortfolioToLocal(certs, projects, hackathons, dsaInput, githubData, { githubAiAnalysis: text });
+      }
+    } catch (err) {
+      console.error("Failed to generate AI analysis", err);
     }
   };
 
   const handleDsaChange = (e) => {
-    setDsaInput({...dsaInput, [e.target.name]: Number(e.target.value)});
+    const newDsa = {...dsaInput, [e.target.name]: Number(e.target.value)};
+    setDsaInput(newDsa);
+    savePortfolioToLocal(certs, projects, hackathons, newDsa, githubData);
   };
 
-  const totalDsa = dsaInput.leetcode + dsaInput.gfg + dsaInput.hackerrank;
+  const totalDsa = dsaInput.leetcode || 0;
   const dsaTarget = 500;
   const pbPercent = Math.min((totalDsa / dsaTarget) * 100, 100);
 
@@ -154,6 +302,9 @@ const PortfolioTracker = () => {
         </button>
         <button className={`tab-btn ${activeTab === 'dsa' ? 'active' : ''}`} onClick={() => setActiveTab('dsa')}>
           <Code2 size={18} /> DSA Progress
+        </button>
+        <button className={`tab-btn ${activeTab === 'github' ? 'active' : ''}`} onClick={() => setActiveTab('github')}>
+          <Code2 size={18} /> Developer DNA
         </button>
       </div>
 
@@ -182,6 +333,9 @@ const PortfolioTracker = () => {
             <div className="cards-grid">
               {certs.map(cert => (
                 <div key={cert.id} className="item-card glass-card hover-up">
+                  <button className="delete-btn" title="Delete Certification" onClick={() => handleDeleteItem('certification', cert.id)}>
+                    <Trash2 size={16} />
+                  </button>
                   <div className="icon-wrap"><Award /></div>
                   <div className="item-details">
                     <h4>{cert.name}</h4>
@@ -211,6 +365,9 @@ const PortfolioTracker = () => {
             <div className="cards-grid">
               {projects.map(proj => (
                 <div key={proj.id} className="item-card project glass-card hover-up">
+                  <button className="delete-btn" title="Delete Project" onClick={() => handleDeleteItem('project', proj.id)}>
+                    <Trash2 size={16} />
+                  </button>
                   <h4>{proj.title}</h4>
                   <div className="stack-tags">
                     {proj.stack.map((s, i) => <span key={i} className="stack-tag">{s.trim()}</span>)}
@@ -240,6 +397,9 @@ const PortfolioTracker = () => {
             <div className="timeline-cards">
               {hackathons.map((hack, index) => (
                 <div key={hack.id} className="timeline-card glass-card">
+                  <button className="delete-btn" title="Delete Hackathon" onClick={() => handleDeleteItem('hackathon', hack.id)}>
+                    <Trash2 size={16} />
+                  </button>
                   <div className="year-bubble">{hack.year}</div>
                   <div className="timeline-info">
                     <h4>{hack.name}</h4>
@@ -266,57 +426,113 @@ const PortfolioTracker = () => {
               </div>
             </div>
 
-            <div className="cards-grid dsa-grid">
+            <div className="cards-grid dsa-grid" style={{gridTemplateColumns: '1fr'}}>
               <div className="platform-card glass-card">
                 <div className="plat-header">
                   <span className="plat-logo leetcode">LC</span>
-                  <h4>LeetCode</h4>
+                  <h4>LeetCode Sync</h4>
                 </div>
                 <div className="plat-input-group">
                   <div style={{display: 'flex', gap: '5px', marginBottom: '10px'}}>
                     <input type="text" placeholder="Username" className="glass-input" style={{flex: 1}} value={leetcodeUsername} onChange={e => setLeetcodeUsername(e.target.value)} />
-                    <button className="btn btn-outline" style={{padding: '0 10px'}} onClick={fetchLeetcodeStats}>Sync</button>
+                    <button className="btn btn-outline" style={{padding: '0 10px'}} onClick={fetchLeetcodeStats} disabled={isLeetcodeLoading}>
+                      {isLeetcodeLoading ? 'Syncing...' : 'Sync'}
+                    </button>
                   </div>
-                  <label>Problems Solved</label>
-                  <input type="number" name="leetcode" className="glass-input" value={dsaInput.leetcode} onChange={handleDsaChange}/>
+                  <label>Total Problems Solved</label>
+                  <input type="number" name="leetcode" className="glass-input" value={dsaInput.leetcode} onChange={handleDsaChange} style={{width: '100px'}}/>
                 </div>
-              </div>
-              <div className="platform-card glass-card">
-                <div className="plat-header">
-                  <span className="plat-logo gfg">GFG</span>
-                  <h4>GeeksForGeeks</h4>
-                </div>
-                <div className="plat-input-group">
-                  <label>Problems Solved</label>
-                  <input type="number" name="gfg" className="glass-input" value={dsaInput.gfg} onChange={handleDsaChange}/>
-                </div>
-              </div>
-              <div className="platform-card glass-card">
-                <div className="plat-header">
-                  <span className="plat-logo hr">HR</span>
-                  <h4>HackerRank</h4>
-                </div>
-                <div className="plat-input-group">
-                  <label>Problems Solved</label>
-                  <input type="number" name="hackerrank" className="glass-input" value={dsaInput.hackerrank} onChange={handleDsaChange}/>
-                </div>
+                
+                {leetcodeAiAnalysis && (
+                  <div className="github-ai-card glass-card" style={{marginTop: '1.5rem'}}>
+                    <div className="ai-header">
+                      <span className="ai-icon">✨</span>
+                      <h4>AI Problem Solving Analysis</h4>
+                    </div>
+                    <p className="ai-text">{leetcodeAiAnalysis}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         )}
-      </div>
 
-      {/* Resume Upload Section - Fixed at bottom */}
-      <div className="resume-section glass-card mt-4">
-        <h3><FileText size={20} className="mr-2 inline" /> Document Vault - Master Resume</h3>
-        <div className="upload-zone">
-          <UploadCloud size={48} className="upload-icon" />
-          <p>Drag and drop your resume PDF here</p>
-          <span className="text-muted text-sm">or</span>
-          <button className="btn btn-outline mt-3">Browse Files</button>
-        </div>
-      </div>
+        {/* DEVELOPER DNA TAB */}
+        {activeTab === 'github' && (
+          <div className="tab-pane fade-in">
+            <div className="form-card glass-card mb-4">
+              <h3>GitHub Synchronization</h3>
+              <div style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
+                <input type="text" placeholder="GitHub Username" className="glass-input" style={{flex: 1}} value={githubUsername} onChange={e => setGithubUsername(e.target.value)} />
+                <button className="btn btn-primary" onClick={fetchGithubStats} disabled={isGithubLoading}>
+                  {isGithubLoading ? 'Syncing...' : 'Sync Profile'}
+                </button>
+              </div>
+            </div>
 
+            {githubData && (
+              <div className="github-dashboard">
+                <div className="github-profile-card glass-card">
+                  <img src={githubData.profile.avatar} alt="Avatar" className="github-avatar" />
+                  <div className="github-info">
+                    <h4>{githubData.profile.name || githubUsername}</h4>
+                    <p>{githubData.profile.bio}</p>
+                    <div className="github-stats">
+                      <span><strong>{githubData.profile.followers}</strong> Followers</span>
+                      <span><strong>{githubData.profile.publicRepos}</strong> Repositories</span>
+                    </div>
+                  </div>
+                </div>
+
+                {githubAiAnalysis && (
+                  <div className="github-ai-card glass-card">
+                    <div className="ai-header">
+                      <span className="ai-icon">✨</span>
+                      <h4>AI Developer DNA Analysis</h4>
+                    </div>
+                    <p className="ai-text">{githubAiAnalysis}</p>
+                  </div>
+                )}
+
+                <div className="github-grid">
+                  <div className="github-langs glass-card">
+                    <h4>Language Distribution</h4>
+                    <div className="lang-list">
+                      {githubData.languageStats.map(lang => (
+                        <div key={lang.language} className="lang-item">
+                          <div className="lang-label">
+                            <span>{lang.language}</span>
+                            <span>{lang.percentage}%</span>
+                          </div>
+                          <div className="lang-bar-bg">
+                            <div className="lang-bar-fill" style={{width: `${lang.percentage}%`}}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="github-repos glass-card">
+                    <h4>Top Repositories</h4>
+                    <div className="repo-list">
+                      {githubData.topRepos.map(repo => (
+                        <a key={repo.name} href={repo.url} target="_blank" rel="noopener noreferrer" className="repo-card hover-up">
+                          <h5>{repo.name}</h5>
+                          <p>{repo.description || "No description"}</p>
+                          <div className="repo-meta">
+                            <span className="repo-lang"><span className="lang-dot"></span>{repo.language || 'Unknown'}</span>
+                            <span className="repo-stars">⭐ {repo.stars}</span>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
