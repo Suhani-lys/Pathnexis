@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bot, ChevronDown, Download, CheckCircle, Circle, Loader2, AlertCircle, Award, CheckSquare } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../config';
 import './Roadmap.css';
 
 const JOB_ROLES = [
@@ -333,7 +334,7 @@ const Roadmap = () => {
     const loadPortfolioAndResume = async () => {
       if (!currentUser) return;
       try {
-        const portRes = await fetch(`http://localhost:3000/api/portfolio/${currentUser.uid}`);
+        const portRes = await fetch(`${API_URL}/api/portfolio/${currentUser.uid}`);
         if (portRes.ok) {
           const data = await portRes.json();
           if (data.status === 'success' && data.portfolio) {
@@ -345,7 +346,7 @@ const Roadmap = () => {
       }
 
       try {
-        const resumeRes = await fetch(`http://localhost:3000/api/resume/latest/${currentUser.uid}`);
+        const resumeRes = await fetch(`${API_URL}/api/resume/latest/${currentUser.uid}`);
         if (resumeRes.ok) {
           const data = await resumeRes.json();
           if (data.status === 'success' && data.analysis) {
@@ -395,7 +396,7 @@ const Roadmap = () => {
       }
 
       try {
-        const res = await fetch(`http://localhost:3000/api/roadmap/${currentUser.uid}`);
+        const res = await fetch(`${API_URL}/api/roadmap/${currentUser.uid}`);
         if (res.ok) {
           const data = await res.json();
           if (data.status === 'success' && data.roadmap) {
@@ -447,7 +448,7 @@ const Roadmap = () => {
           updateUserData({ readinessScore });
         }
         // Save Skill Gap report to MongoDB
-        await fetch('http://localhost:3000/api/skill-gap', {
+        await fetch(`${API_URL}/api/skill-gap`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -531,7 +532,7 @@ const Roadmap = () => {
         }));
 
         try {
-          await fetch('http://localhost:3000/api/roadmap', {
+          await fetch(`${API_URL}/api/roadmap`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -612,7 +613,7 @@ const Roadmap = () => {
     }
 
     try {
-      await fetch(`http://localhost:3000/api/roadmap/${currentUser.uid}/tasks`, {
+      await fetch(`${API_URL}/api/roadmap/${currentUser.uid}/tasks`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

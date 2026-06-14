@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Award, Briefcase, Code2, ShieldAlert, BadgeInfo, Calendar, Link as LinkIcon, DownloadCloud, UploadCloud, FileText, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../config';
 import './PortfolioTracker.css';
 
 const MOCK_DATA = {
@@ -71,7 +72,7 @@ const PortfolioTracker = () => {
 
       // Sync from MongoDB in the background
       try {
-        const res = await fetch(`http://localhost:3000/api/portfolio/${currentUser.uid}`);
+        const res = await fetch(`${API_URL}/api/portfolio/${currentUser.uid}`);
         if (res.ok) {
           const data = await res.json();
           if (data.status === "success" && data.portfolio) {
@@ -117,7 +118,7 @@ const PortfolioTracker = () => {
     localStorage.setItem(storageKey, JSON.stringify(payload));
 
     try {
-      await fetch(`http://localhost:3000/api/portfolio/${currentUser.uid}`, {
+      await fetch(`${API_URL}/api/portfolio/${currentUser.uid}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -190,7 +191,7 @@ const PortfolioTracker = () => {
     setIsLeetcodeLoading(true);
     try {
       // Calling our custom Node.js backend to bypass CORS
-      const res = await fetch(`http://localhost:3000/api/leetcode/${leetcodeUsername}`);
+      const res = await fetch(`${API_URL}/api/leetcode/${leetcodeUsername}`);
       const data = await res.json();
       
       if (data.status === "success") {
@@ -234,7 +235,7 @@ const PortfolioTracker = () => {
     if(!githubUsername) return;
     setIsGithubLoading(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/github/${githubUsername}`);
+      const res = await fetch(`${API_URL}/api/github/${githubUsername}`);
       const data = await res.json();
       if (data.status === "success") {
         setGithubData(data);

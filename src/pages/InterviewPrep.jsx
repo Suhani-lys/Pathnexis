@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, MessageSquare, Bot, UploadCloud, ChevronUp, PlayCircle, Loader2, Award, Clock, ArrowRight, BookOpen, AlertCircle, RefreshCw, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../config';
 import './InterviewPrep.css';
 
 const PREDEFINED_CATEGORIES = ['DSA', 'OOPs', 'System Design', 'SQL', 'Web Dev', 'HR Questions'];
@@ -244,7 +245,7 @@ const InterviewPrep = () => {
       // Load previous mock interview results
       setLoadingHistory(true);
       try {
-        const historyRes = await fetch(`http://localhost:3000/api/interview/results/${currentUser.uid}`);
+        const historyRes = await fetch(`${API_URL}/api/interview/results/${currentUser.uid}`);
         if (historyRes.ok) {
           const historyData = await historyRes.json();
           if (historyData.status === 'success') {
@@ -259,7 +260,7 @@ const InterviewPrep = () => {
 
       // Load latest resume to generate questions if available
       try {
-        const resumeRes = await fetch(`http://localhost:3000/api/resume/latest/${currentUser.uid}`);
+        const resumeRes = await fetch(`${API_URL}/api/resume/latest/${currentUser.uid}`);
         if (resumeRes.ok) {
           const resumeData = await resumeRes.json();
           if (resumeData.status === 'success' && resumeData.analysis) {
@@ -335,7 +336,7 @@ const InterviewPrep = () => {
             }))
           };
 
-          const res = await fetch('http://localhost:3000/api/interview/result', {
+          const res = await fetch(`${API_URL}/api/interview/result`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -434,7 +435,7 @@ const InterviewPrep = () => {
       // Save to MongoDB
       if (currentUser) {
         try {
-          await fetch('http://localhost:3000/api/resume/upload', {
+          await fetch(`${API_URL}/api/resume/upload`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

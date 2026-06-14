@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { googleLogout } from '@react-oauth/google';
 import { localDB } from '../firebase';
+import { API_URL } from '../config';
 
 const checkAndCalculateStreak = (profile) => {
   if (!profile) return profile;
@@ -63,7 +64,7 @@ export const AuthProvider = ({ children }) => {
           
           // Load user data from MongoDB asynchronously without blocking UI mount
           try {
-            const res = await fetch(`http://localhost:3000/api/users/${user.uid}`);
+            const res = await fetch(`${API_URL}/api/users/${user.uid}`);
             if (res.ok) {
               const data = await res.json();
               if (data.status === 'success') {
@@ -112,7 +113,7 @@ export const AuthProvider = ({ children }) => {
       };
 
       try {
-        const res = await fetch('http://localhost:3000/api/users', {
+        const res = await fetch(`${API_URL}/api/users`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(fallbackDemoProfile)
@@ -169,7 +170,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     try {
-      const res = await fetch('http://localhost:3000/api/users', {
+      const res = await fetch(`${API_URL}/api/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -214,7 +215,7 @@ export const AuthProvider = ({ children }) => {
     });
 
     try {
-      const res = await fetch(`http://localhost:3000/api/users/${currentUser.uid}`, {
+      const res = await fetch(`${API_URL}/api/users/${currentUser.uid}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)

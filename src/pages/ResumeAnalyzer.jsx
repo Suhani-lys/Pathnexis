@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UploadCloud, FileText, CheckCircle2, AlertCircle, Lightbulb, Download } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../config';
 import './ResumeAnalyzer.css';
 
 const CircularProgress = ({ percentage }) => {
@@ -121,7 +122,7 @@ const ResumeAnalyzer = () => {
     const loadLatestAnalysis = async () => {
       if (!currentUser) return;
       try {
-        const res = await fetch(`http://localhost:3000/api/resume/latest/${currentUser.uid}`);
+        const res = await fetch(`${API_URL}/api/resume/latest/${currentUser.uid}`);
         if (res.ok) {
           const data = await res.json();
           if (data.status === 'success' && data.analysis) {
@@ -214,7 +215,7 @@ const ResumeAnalyzer = () => {
       // Persist results to MongoDB
       if (currentUser) {
         try {
-          await fetch('http://localhost:3000/api/resume/upload', {
+          await fetch(`${API_URL}/api/resume/upload`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

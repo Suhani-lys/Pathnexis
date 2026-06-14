@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../config';
 import { Flame, CheckCircle, Unlock, ArrowRight, Check } from 'lucide-react';
 import './Dashboard.css';
 
@@ -97,7 +98,7 @@ const Dashboard = () => {
       if (!isDemo && currentUser?.uid) {
         try {
           // 1. Fetch portfolio insights
-          const portRes = await fetch(`http://localhost:3000/api/portfolio/${currentUser.uid}`);
+          const portRes = await fetch(`${API_URL}/api/portfolio/${currentUser.uid}`);
           if (portRes.ok) {
             const pData = await portRes.json();
             if (pData.status === 'success' && pData.portfolio) {
@@ -107,7 +108,7 @@ const Dashboard = () => {
           }
 
           // 2. Fetch roadmap progress
-          const roadmapRes = await fetch(`http://localhost:3000/api/roadmap/${currentUser.uid}`);
+          const roadmapRes = await fetch(`${API_URL}/api/roadmap/${currentUser.uid}`);
           if (roadmapRes.ok) {
             const rData = await roadmapRes.json();
             if (rData.status === 'success' && rData.roadmap) {
@@ -198,7 +199,7 @@ const Dashboard = () => {
     }));
 
     try {
-      await fetch(`http://localhost:3000/api/roadmap/${currentUser.uid}/tasks`, {
+      await fetch(`${API_URL}/api/roadmap/${currentUser.uid}/tasks`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
